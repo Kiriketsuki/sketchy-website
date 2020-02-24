@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<style>
+
+    body {
+        text-align: center;
+    }
+
+    #controlButtons {
+        display: inline;
+        text-align: center;
+        padding: 10px;
+    }
+
+    #gridContainer {
+        margin-top: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 960px;
+        max-width: 960px;
+        height: 960px;
+        max-height: 960px;
+        border: 1px solid black;
+        font-size: 0;
+    }
+
+    #displayInformation {
+        margin-top : 10px;
+    }
+
+    #displayInformation p {
+        margin-left: auto;
+        margin-right: auto;
+        color: red;
+    }
+</style>
+
+<html>
+    <head>
+        <title>
+            A Sketchy Website
+        </title>
+    </head>
+
+    <body>
+        <h1>
+            A Sketchy Website
+        </h1>
+
+        <h2>
+            A simple Javascript project, where you can draw on a square grid with a size of your choice
+        </h2>
+
+        <h5>
+            Maximum of 480 by 480
+        </h5>
+
+        <div id = "controlButtons">
+            <button id = "sizeSelector">
+                Select Grid Size
+            </button>
+
+            <button id = "blackink">
+                Black
+            </button>
+
+            <button id = "rainbowInk">
+                Rainbow
+            </button>
+        </div>
+
+        <div id = "displayInformation">
+
+            <p id = "gridSize"> 
+            </p>
+            
+            <p id = "selectedColour">
+            </p>
+        </div>
+
+        <div id = "gridContainer">
+
+        </div>
+    </body>
+</html>
+
+<script>
+    var gridSize = 0; // how many boxes per row and per column
+    var boxSize = 0; //initializing the boxSize variable
+    var selectedColour = "black"; //initial colour black
+
+    const gridContainer = document.querySelector("#gridContainer"); 
+
+    var boxNodeList = [];
+
+    const gridSizeInformation = document.querySelector("#gridSize");
+    gridSizeInformation.textContent = (`The current grid size is ${gridSize} by ${gridSize}`);
+
+    const selectedColourInformation = document.querySelector("#selectedColour");
+    selectedColourInformation.textContent = (`The current colour ink is ${selectedColour}`);
+
+    function updateBoxSize(a) {
+        boxSize = (960/gridSize);
+    }
+
+    function chooseGridSize() {
+        var requestedGridSize;
+        var requestedGridSizeInt;
+
+        requestedGridSize = parseInt(prompt("Please choose the size of the grid"));
+        requestedGridSizeInt = requestedGridSize || 0;
+        if (requestedGridSizeInt <= 0) {
+            alert ("Sorry, invalid size chosen. Please try again");
+            requestedGridSizeInt = chooseGridSize();
+
+        } else if (960%requestedGridSizeInt != 0) {
+            alert ("Sorry, that size grid does not fit nicely. Please try again");
+            requestedGridSizeInt = chooseGridSize();
+        }
+
+
+        return requestedGridSizeInt;
+    }
+
+    function deleteChildren(container) {
+        while (container.hasChildNodes()) {
+            container.removeChild(container.lastChild);
+        }
+    }
+
+    function generateGrid(gridSize,boxSize) {
+        for (var i = 0; i < gridSize; i++) {
+            var newRow = document.createElement("div");
+            newRow.style.margin = "0px 0px 0px 0px";
+            newRow.style.display = "inline";
+            newRow.style.height = `${boxSize}px`;
+            newRow.style.width = "960px";
+            newRow.style.padding = "0px";
+            newRow.style.boxSizing = "border-box";
+            newRow.classList.add("row");
+
+            for (var j = 0; j < gridSize; j++) {
+                var newBox = document.createElement("span");
+                newBox.style.boxSizing = "border-box";
+                newBox.style.border = "1px solid black";
+                newBox.style.backgroundColor = "white";
+                newBox.style.width = `${boxSize}px`;
+                newBox.style.height = `${boxSize}px`;
+                newBox.classList.add("box");
+                newBox.style.display = "inline-block";
+
+                newRow.appendChild(newBox);
+            }
+
+            gridContainer.appendChild(newRow);
+        }
+    }
+
+    const sizeButton = document.querySelector("#sizeSelector");
+    sizeButton.addEventListener("click", function (e){
+        gridSize = chooseGridSize();
+        updateBoxSize();
+        gridSizeInformation.textContent = (`The current grid size is ${gridSize} by ${gridSize}`);
+        deleteChildren(gridContainer);
+        generateGrid(gridSize,boxSize);
+        boxNodeList = document.querySelectorAll(".box");
+        boxNodeList.forEach((span) => {
+            span.addEventListener("mouseover", (e) => {
+                span.style.backgroundColor = "black";
+             })
+        })    
+    })
+
+    
+    
+</script>
