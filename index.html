@@ -4,8 +4,12 @@
 
     body {
         text-align: center;
+        background-color: #85d6ff;
     }
 
+    h1, h2 {
+        font-family: "Courier New",Garamond,Arial;
+    }
     #controlButtons {
         display: inline;
         text-align: center;
@@ -22,16 +26,34 @@
         max-height: 960px;
         border: 1px solid black;
         font-size: 0;
+        display: inline-block;
+        padding: 0;
+        background-color: white;
     }
 
     #displayInformation {
         margin-top : 10px;
+        text-align: center;
     }
 
     #displayInformation p {
         margin-left: auto;
         margin-right: auto;
-        color: red;
+        color: #ff8f85;
+        text-shadow: 0.5px 0.5px black;
+        font-size: 20px;
+    }
+
+    button {
+        font-size: 20px;
+        border-style: groove;
+        padding: 10px;
+        text-emphasis: bold;
+        text-transform: capitalize;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #ffeb85;
+        border-radius: 15px;
+        
     }
 </style>
 
@@ -48,24 +70,26 @@
         </h1>
 
         <h2>
-            A simple Javascript project, where you can draw on a square grid with a size of your choice
+            A simple Javascript project, where you can sketch on a square grid with a size of your choice
         </h2>
 
-        <h5>
-            Maximum of 480 by 480
-        </h5>
 
         <div id = "controlButtons">
             <button id = "sizeSelector">
                 Select Grid Size
             </button>
 
-            <button id = "blackink">
+            <button id = "blackInk">
                 Black
             </button>
-
-            <button id = "rainbowInk">
-                Rainbow
+            
+            
+            <button id = "randomInk">
+                Random Colour
+            </button>
+            
+            <button id = "reverseInk">
+                Reverse Intensity
             </button>
         </div>
 
@@ -75,6 +99,9 @@
             </p>
             
             <p id = "selectedColour">
+            </p>
+
+            <p id = "isReverse">
             </p>
         </div>
 
@@ -88,6 +115,7 @@
     var gridSize = 0; // how many boxes per row and per column
     var boxSize = 0; //initializing the boxSize variable
     var selectedColour = "black"; //initial colour black
+    var isReverse = false;
 
     const gridContainer = document.querySelector("#gridContainer"); 
 
@@ -97,10 +125,16 @@
     gridSizeInformation.textContent = (`The current grid size is ${gridSize} by ${gridSize}`);
 
     const selectedColourInformation = document.querySelector("#selectedColour");
-    selectedColourInformation.textContent = (`The current colour ink is ${selectedColour}`);
+    selectedColourInformation.textContent = (`The current colour ink is now ${selectedColour}`);
+    selectedColourInformation.style.color = selectedColour;
+
+    const isReverseInformation = document.querySelector("#isReverse");
+    if (!isReverse) {
+        isReverseInformation.textContent = (`The grids will darken`);
+    }
 
     function updateBoxSize(a) {
-        boxSize = (960/gridSize);
+        boxSize = (960/gridSize) - 0.005;
     }
 
     function chooseGridSize() {
@@ -110,15 +144,10 @@
         requestedGridSize = parseInt(prompt("Please choose the size of the grid"));
         requestedGridSizeInt = requestedGridSize || 0;
         if (requestedGridSizeInt <= 0) {
-            alert ("Sorry, invalid size chosen. Please try again");
-            requestedGridSizeInt = chooseGridSize();
+            alert ("Sorry, invalid size chosen. Defaulted to 10 by 10");
+            requestedGridSizeInt = 10;
 
-        } else if (960%requestedGridSizeInt != 0) {
-            alert ("Sorry, that size grid does not fit nicely. Please try again");
-            requestedGridSizeInt = chooseGridSize();
-        }
-
-
+        } 
         return requestedGridSizeInt;
     }
 
@@ -131,29 +160,90 @@
     function generateGrid(gridSize,boxSize) {
         for (var i = 0; i < gridSize; i++) {
             var newRow = document.createElement("div");
-            newRow.style.margin = "0px 0px 0px 0px";
-            newRow.style.display = "inline";
             newRow.style.height = `${boxSize}px`;
-            newRow.style.width = "960px";
-            newRow.style.padding = "0px";
-            newRow.style.boxSizing = "border-box";
+            newRow.style.width = "100%";
+            newRow.style.marginLeft = "auto";
+            newRow.style.marginRight = "auto";
             newRow.classList.add("row");
+            newRow.style.overflow = "hidden";
 
             for (var j = 0; j < gridSize; j++) {
                 var newBox = document.createElement("span");
                 newBox.style.boxSizing = "border-box";
-                newBox.style.border = "1px solid black";
+                newBox.style.borderStyle = "dotted";
+                newBox.style.borderWidth = "0.5px";
+                newBox.style.borderColor = "hsl(0,0%,25%)";
                 newBox.style.backgroundColor = "white";
                 newBox.style.width = `${boxSize}px`;
                 newBox.style.height = `${boxSize}px`;
                 newBox.classList.add("box");
                 newBox.style.display = "inline-block";
+                newBox.setAttribute("data-lightness", 100);
 
                 newRow.appendChild(newBox);
             }
 
             gridContainer.appendChild(newRow);
         }
+    }
+
+    function increaseOpacity(object,colour) { //colour should be a string, be it "black" or "white" or "hsl(hue,sat%,"
+        objectLightness = parseInt(object.getAttribute("data-lightness"))
+        if (colour == "black"){
+            if (objectLightness == 0) {
+                return;
+            } else {
+                objectLightness -= 10;
+                object.setAttribute("data-lightness",objectLightness);
+                object.style.backgroundColor = `hsl(0,0%,${objectLightness}%)`;
+                return;
+            }
+        }   else {
+                if (objectLightness == 0) {
+                    return;
+                } else {
+                    objectLightness -= 10;
+                    object.setAttribute("data-lightness",objectLightness);
+                    object.style.backgroundColor = `${colour}${objectLightness}%)`
+                    return;
+                }
+            
+        }
+    }
+
+    function decreaseOpacity(object,colour) { //opposite of increase. For use when inReverse is true
+        objectLightness = parseInt(object.getAttribute("data-lightness"))
+        if (colour == "black"){
+            if (objectLightness ==  100) {
+                return;
+            } else {
+                objectLightness += 10;
+                object.setAttribute("data-lightness",objectLightness);
+                object.style.backgroundColor = `hsl(0,0%,${objectLightness}%)`;
+                return;
+            }
+        }   else {
+                if (objectLightness == 100) {
+                    return;
+                } else {
+                    objectLightness += 10;
+                    object.setAttribute("data-lightness",objectLightness);
+                    object.style.backgroundColor = `${colour}${objectLightness}%)`
+                    return;
+                }
+            
+        }
+    }
+
+    function generateColour () { //should return a string
+        var toReturn = "";
+        var hueValue = 0;
+        var satValue = 0;
+
+        hueValue = Math.floor(Math.random()*361);
+        satValue = Math.floor(Math.random()*101);
+        toReturn = `hsl(${hueValue},${satValue}%,`
+        return toReturn;
     }
 
     const sizeButton = document.querySelector("#sizeSelector");
@@ -165,12 +255,38 @@
         generateGrid(gridSize,boxSize);
         boxNodeList = document.querySelectorAll(".box");
         boxNodeList.forEach((span) => {
-            span.addEventListener("mouseover", (e) => {
-                span.style.backgroundColor = "black";
-             })
+            span.addEventListener("mouseover", (e) =>{
+                if (!isReverse) {
+                    increaseOpacity(span,selectedColour);
+                } else {
+                    decreaseOpacity(span,selectedColour);
+                }
+                
+            });
         })    
     })
 
+    const randomButton = document.querySelector("#randomInk");
+    randomButton.addEventListener("click", function(e){
+        selectedColour = generateColour();
+        selectedColourInformation.textContent = (`The current colour ink now has a HSL value of ${selectedColour}100%)`);
+        selectedColourInformation.style.color = `${selectedColour}50%)`;
+    })
     
+    const blackButton = document.querySelector("#blackInk");
+    blackButton.addEventListener("click", function(e) {
+        selectedColour = "black";
+        selectedColourInformation.textContent = (`The current colour ink is now black`);
+        selectedColourInformation.style.color = selectedColour;
+    })
     
+    const reverseButton = document.querySelector("#reverseInk");
+        reverseButton.addEventListener("click", function(e) {
+        isReverse = !isReverse;
+        if (!isReverse) {
+            isReverseInformation.textContent = (`The grids will darken`);
+        } else {
+            isReverseInformation.textContent = (`The grids will lighten`);
+        }
+    })
 </script>
