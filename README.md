@@ -1,1 +1,1 @@
-This is a project from The Odin Project, where I try to make an etch-a-sketch via Javascript
+This is a project from The Odin Project, where I try to make an etch-a-sketch via Javascript. From The Odin Project's [curriculum](https://www.theodinproject.com/courses/web-development-101/lessons/etch-a-sketch-project)
